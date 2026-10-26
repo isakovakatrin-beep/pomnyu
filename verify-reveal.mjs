@@ -1,0 +1,10 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const code=fs.readFileSync('dist/reveal.js','utf8');
+const events={},queue=[],nodes=[];const preference={matches:false,addEventListener(_,f){this.change=f}};
+const context={innerHeight:800,scrollY:0,matchMedia:()=>preference,requestAnimationFrame:f=>queue.push(f),addEventListener:(name,f)=>events[name]=f,document:{documentElement:{scrollHeight:5000},body:{append:n=>nodes.push(n)},createElement:()=>({values:{},style:{setProperty(k,v){nodes.at(-1).values[k]=Number(v)}},setAttribute(){},remove(){this.removed=true}})}};
+vm.runInNewContext(code,context);let n=nodes.at(-1);assert.equal(n.values['--edge-top'],0);assert.equal(n.values['--edge-bottom'],1);
+const scroll=y=>{context.scrollY=y;events.scroll();while(queue.length)queue.shift()()};scroll(800);assert.equal(n.values['--edge-top'],1);assert.equal(n.values['--edge-bottom'],1);scroll(4200);assert.equal(n.values['--edge-bottom'],0);scroll(4120);assert(n.values['--edge-bottom']>0&&n.values['--edge-bottom']<1);scroll(80);assert(n.values['--edge-top']>0&&n.values['--edge-top']<1);scroll(0);assert.equal(n.values['--edge-top'],0);
+context.scrollY=200;events.scroll();events.scroll();assert.equal(queue.length,1);queue.shift()();
+preference.matches=true;preference.change();assert(n.removed);events.scroll();assert.equal(queue.length,0);preference.matches=false;preference.change();assert.equal(nodes.length,2);
+const css=fs.readFileSync('dist/style.css','utf8');assert(!css.includes('.reveal-darkness'));assert(css.includes('pointer-events:none'));assert(css.includes('linear-gradient(to top'));assert(css.includes('linear-gradient(to bottom'));
+console.log('PASS: reversible continuous gradients, top/bottom boundaries, partial feathering, one frame per scroll batch, and live reduced-motion changes.');
