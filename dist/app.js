@@ -13,7 +13,7 @@
   }));
   function fit(){
     const mobile=matchMedia('(max-width:767px)').matches;
-    const width=Math.min(innerWidth,mobile?600:1440),base=mobile?360:1440,height=mobile?3818:6373;
+    const width=Math.min(innerWidth,mobile?600:1440),base=mobile?360:1440,height=mobile?4123:6373;
     const canvas=document.querySelector(mobile?'.mobile':'.desktop');
     canvas.style.transform=`scale(${width/base})`;document.getElementById('longread').style.height=`${height*width/base}px`;
     document.querySelector('.desktop').setAttribute('aria-hidden',String(mobile));document.querySelector('.mobile').setAttribute('aria-hidden',String(!mobile));
